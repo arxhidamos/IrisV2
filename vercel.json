@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd irisv2 && pnpm install && pnpm build",
+  "outputDirectory": "irisv2/.next",
+  "framework": "nextjs",
+  "installCommand": "cd irisv2 && pnpm install"
+}

@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd irisv2 && npm install --no-package-lock && npm run build",
-  "outputDirectory": "irisv2/.next",
   "framework": "nextjs",
-  "installCommand": "cd irisv2 && npm install --no-package-lock"
+  "installCommand": "npm install --no-package-lock",
+  "buildCommand": "npm run build"
 }

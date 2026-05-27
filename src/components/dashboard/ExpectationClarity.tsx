@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { CheckCircle2, Clock, RefreshCw, Plus, MessageSquare } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
 import type { DashboardData, UserRole, Expectation } from '@/lib/types'
 import { addExpectation, updateExpectationStatus, toggleMilestone } from '@/lib/storage'
@@ -55,6 +55,7 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
     onUpdate(updated)
     setNewText('')
     setNewAuthor('')
+    toast.success('Expectation submitted — the lecturer will review it shortly.')
   }
 
   function handleSaveNote(id: string) {
@@ -62,6 +63,24 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
     onUpdate(updated)
     setEditingId(null)
     setNoteText('')
+    toast.success(`Expectation marked as ${noteStatus}.`)
+  }
+
+  function handleToggleMilestone(milestoneId: string) {
+    const milestone = data.milestones.find(m => m.id === milestoneId)
+    if (!milestone) return
+    const updated = toggleMilestone(data, milestoneId)
+    onUpdate(updated)
+    const next = !milestone.completed
+    if (role === 'student') {
+      toast(next ? '✅ Milestone marked as done!' : 'Milestone unmarked.', {
+        description: milestone.title,
+      })
+    } else {
+      toast(next ? 'Milestone completed.' : 'Milestone reopened.', {
+        description: milestone.title,
+      })
+    }
   }
 
   const completedMilestones = data.milestones.filter(m => m.completed).length
@@ -199,9 +218,10 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
               {data.milestones.map(m => (
                 <div key={m.id} className="flex items-start gap-2.5">
                   <button
-                    onClick={() => role === 'lecturer' && onUpdate(toggleMilestone(data, m.id))}
-                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border-2 transition-colors ${m.completed ? 'bg-primary border-primary' : 'border-border bg-white'} ${role === 'lecturer' ? 'cursor-pointer hover:border-primary' : 'cursor-default'}`}
+                    onClick={() => handleToggleMilestone(m.id)}
+                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded border-2 transition-colors cursor-pointer hover:border-primary ${m.completed ? 'bg-primary border-primary' : 'border-border bg-white'}`}
                     aria-label={m.completed ? 'Mark incomplete' : 'Mark complete'}
+                    title={role === 'student' ? 'Click to track your progress' : 'Click to toggle completion'}
                   >
                     {m.completed && (
                       <svg viewBox="0 0 12 12" fill="none" className="w-full h-full p-0.5">
@@ -220,9 +240,9 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
                 </div>
               ))}
             </div>
-            {role === 'lecturer' && (
-              <p className="text-xs text-muted-foreground pt-1">Click checkboxes to toggle milestone completion.</p>
-            )}
+            <p className="text-xs text-muted-foreground pt-1">
+              {role === 'student' ? 'Check off milestones as you complete them.' : 'Click checkboxes to toggle milestone completion.'}
+            </p>
           </CardContent>
         </Card>
 

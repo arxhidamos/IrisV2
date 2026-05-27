@@ -1,16 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, CheckCircle2, Clock, Send, ChevronDown, ChevronUp, Tag } from 'lucide-react'
+import { MessageCircle, CheckCircle2, Clock, Send, ChevronDown, ChevronUp, Tag, Share2, ThumbsUp } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
 import type { DashboardData, UserRole, QuestionTag } from '@/lib/types'
 import { addQuestion, addAnswer } from '@/lib/storage'
 
@@ -57,6 +56,8 @@ export function QAPortal({ data, role, onUpdate }: Props) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [replyText, setReplyText] = useState<Record<string, string>>({})
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  // Helpful votes (local state only — no backend)
+  const [helpfulVotes, setHelpfulVotes] = useState<Set<string>>(new Set())
 
   // New question form state
   const [qText, setQText] = useState('')
@@ -92,6 +93,7 @@ export function QAPortal({ data, role, onUpdate }: Props) {
     setQAuthor('')
     setQAnon(false)
     setShowForm(false)
+    toast.success('Question posted!', { description: 'The lecturer will be notified.' })
   }
 
   function handleSubmitReply(questionId: string) {
@@ -101,6 +103,35 @@ export function QAPortal({ data, role, onUpdate }: Props) {
     onUpdate(updated)
     setReplyText(prev => ({ ...prev, [questionId]: '' }))
     setReplyingTo(null)
+    setExpandedIds(prev => new Set(prev).add(questionId))
+    toast.success('Answer posted — students have been notified.')
+  }
+
+  function handleShareQuestion(questionId: string, questionText: string) {
+    const url = `${window.location.href.split('?')[0]}?q=${questionId}`
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        toast.success('Link copied!', { description: questionText.slice(0, 60) + (questionText.length > 60 ? '…' : '') })
+      }).catch(() => {
+        toast.info('Copy this link:', { description: url })
+      })
+    } else {
+      toast.info('Copy this link:', { description: url })
+    }
+  }
+
+  function handleHelpful(questionId: string) {
+    setHelpfulVotes(prev => {
+      const next = new Set(prev)
+      if (next.has(questionId)) {
+        next.delete(questionId)
+        toast('Vote removed.')
+      } else {
+        next.add(questionId)
+        toast.success('Marked as helpful!')
+      }
+      return next
+    })
   }
 
   const unansweredCount = data.questions.filter(q => !q.answered).length
@@ -201,6 +232,7 @@ export function QAPortal({ data, role, onUpdate }: Props) {
         {filtered.map(question => {
           const expanded = expandedIds.has(question.id)
           const isReplying = replyingTo === question.id
+          const isHelpful = helpfulVotes.has(question.id)
 
           return (
             <Card key={question.id} className={`transition-shadow hover:shadow-md ${!question.answered ? 'border-amber-200' : ''}`}>
@@ -276,37 +308,62 @@ export function QAPortal({ data, role, onUpdate }: Props) {
                   </button>
                 )}
 
-                {/* Lecturer reply area */}
-                {role === 'lecturer' && (
-                  <div className="pt-2 border-t border-border">
-                    {isReplying ? (
-                      <div className="space-y-2">
-                        <Textarea
-                          placeholder="Write your answer — it will be visible to all students."
-                          value={replyText[question.id] ?? ''}
-                          onChange={e => setReplyText(prev => ({ ...prev, [question.id]: e.target.value }))}
-                          className="min-h-[80px] text-sm"
-                        />
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleSubmitReply(question.id)} disabled={!replyText[question.id]?.trim()} style={{ backgroundColor: '#E6007E', color: 'white' }}>
-                            <Send size={12} /> Post Answer
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                {/* Action bar */}
+                <div className="flex items-center gap-1 pt-1 border-t border-border/50">
+                  {/* Helpful vote (student) */}
+                  {role === 'student' && (
+                    <button
+                      onClick={() => handleHelpful(question.id)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${isHelpful ? 'text-white' : 'text-muted-foreground hover:bg-muted'}`}
+                      style={isHelpful ? { backgroundColor: '#E6007E' } : {}}
+                      aria-pressed={isHelpful}
+                      title="Mark this question as helpful"
+                    >
+                      <ThumbsUp size={12} />
+                      {isHelpful ? 'Helpful' : 'Helpful?'}
+                    </button>
+                  )}
+
+                  {/* Share */}
+                  <button
+                    onClick={() => handleShareQuestion(question.id, question.text)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+                    title="Copy link to this question"
+                  >
+                    <Share2 size={12} />
+                    Share
+                  </button>
+
+                  {/* Lecturer reply area */}
+                  {role === 'lecturer' && (
+                    <div className="flex-1">
+                      {isReplying ? (
+                        <div className="space-y-2 mt-2">
+                          <Textarea
+                            placeholder="Write your answer — it will be visible to all students."
+                            value={replyText[question.id] ?? ''}
+                            onChange={e => setReplyText(prev => ({ ...prev, [question.id]: e.target.value }))}
+                            className="min-h-[80px] text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={() => handleSubmitReply(question.id)} disabled={!replyText[question.id]?.trim()} style={{ backgroundColor: '#E6007E', color: 'white' }}>
+                              <Send size={12} /> Post Answer
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 text-xs"
-                        onClick={() => { setReplyingTo(question.id); setExpandedIds(prev => new Set(prev).add(question.id)) }}
-                      >
-                        <MessageCircle size={12} />
-                        {question.answered ? 'Add another answer' : 'Answer this question'}
-                      </Button>
-                    )}
-                  </div>
-                )}
+                      ) : (
+                        <button
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+                          onClick={() => { setReplyingTo(question.id); setExpandedIds(prev => new Set(prev).add(question.id)) }}
+                        >
+                          <MessageCircle size={12} />
+                          {question.answered ? 'Add another answer' : 'Answer this question'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )
@@ -317,7 +374,7 @@ export function QAPortal({ data, role, onUpdate }: Props) {
       <div className="space-y-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Q&A Overview</CardTitle>
+            <CardTitle className="text-base">Q&amp;A Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {[
@@ -342,8 +399,13 @@ export function QAPortal({ data, role, onUpdate }: Props) {
               const count = data.questions.filter(q => q.tag === tag).length
               const cfg = tagConfig[tag]
               return (
-                <div key={tag} className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} w-24`}>
+                <button
+                  key={tag}
+                  className="w-full flex items-center gap-2 rounded hover:bg-muted/50 transition-colors py-1 px-1"
+                  onClick={() => setFilter(tag)}
+                  title={`Filter by ${cfg.label}`}
+                >
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} w-24 flex-shrink-0`}>
                     <Tag size={10} />
                     {cfg.label}
                   </span>
@@ -353,8 +415,8 @@ export function QAPortal({ data, role, onUpdate }: Props) {
                       style={{ width: `${(count / data.questions.length) * 100}%`, backgroundColor: '#E6007E' }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground w-4 text-right">{count}</span>
-                </div>
+                  <span className="text-xs text-muted-foreground w-4 text-right flex-shrink-0">{count}</span>
+                </button>
               )
             })}
           </CardContent>

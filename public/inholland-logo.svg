@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Magenta background square -->
+  <rect width="120" height="120" rx="14" fill="#E6007E"/>
+  <!-- White "inh" lettermark — matches official Inholland brand mark -->
+  <text
+    x="60"
+    y="78"
+    text-anchor="middle"
+    fill="white"
+    font-family="'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif"
+    font-size="44"
+    font-weight="800"
+    letter-spacing="-1.5"
+  >inh</text>
+</svg>

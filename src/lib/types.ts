@@ -74,3 +74,18 @@ export interface DashboardData {
   milestones: Milestone[]
   initialized: boolean
 }
+
+export interface UserProfile {
+  displayName: string
+  email: string
+  rolePreference: UserRole
+  notifyQuestions: boolean
+  notifyMilestones: boolean
+  notifyExpectations: boolean
+  language: 'en' | 'nl'
+}
+
+export interface AuthSession {
+  loggedIn: boolean
+  loginTime: string
+}

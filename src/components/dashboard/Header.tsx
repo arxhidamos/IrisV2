@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import type { UserRole, UserProfile } from '@/lib/types'
 
 interface HeaderProps {
@@ -26,18 +27,14 @@ export function Header({ role, onRoleChange, profile, onOpenSettings }: HeaderPr
     >
       {/* Logo + course title */}
       <div className="flex items-center gap-3">
-        <div
-          className="flex items-center justify-center rounded-md font-bold text-sm tracking-tight select-none"
-          style={{
-            width: 36,
-            height: 36,
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            color: '#fff',
-            fontFamily: 'IBM Plex Sans, sans-serif',
-          }}
-        >
-          inh
-        </div>
+        <Image
+          src="/inholland-logo.svg"
+          alt="Inholland"
+          width={36}
+          height={36}
+          className="rounded-md select-none flex-shrink-0"
+          priority
+        />
         <div className="flex flex-col leading-tight">
           <span className="text-white font-semibold text-sm">Business Innovation</span>
           <span className="text-white/70 text-xs">Inholland · 2024–2025</span>

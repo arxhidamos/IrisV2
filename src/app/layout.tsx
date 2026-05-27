@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Sans } from 'next/font/google'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={ibmPlexSans.variable}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <Toaster richColors position="bottom-right" />
+      </body>
     </html>
   )
 }

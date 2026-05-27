@@ -1,6 +1,6 @@
 'use client'
 
-import type { DashboardData, Question, Expectation, SessionReflection } from './types'
+import type { DashboardData, Question, Expectation, SessionReflection, UserProfile, AuthSession } from './types'
 import {
   seedQuestions,
   seedExpectations,
@@ -10,6 +10,63 @@ import {
 } from './seed-data'
 
 const STORAGE_KEY = 'inholland_iris_data'
+const AUTH_KEY = 'inholland_iris_auth'
+const PROFILE_KEY = 'inholland_iris_profile'
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export function getSession(): AuthSession {
+  if (typeof window === 'undefined') return { loggedIn: false, loginTime: '' }
+  try {
+    const raw = localStorage.getItem(AUTH_KEY)
+    if (!raw) return { loggedIn: false, loginTime: '' }
+    return JSON.parse(raw) as AuthSession
+  } catch {
+    return { loggedIn: false, loginTime: '' }
+  }
+}
+
+export function setSession(session: AuthSession): void {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(AUTH_KEY, JSON.stringify(session))
+}
+
+export function clearSession(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(AUTH_KEY)
+}
+
+// ─── Profile ─────────────────────────────────────────────────────────────────
+
+const defaultProfile: UserProfile = {
+  displayName: 'Alex de Vries',
+  email: 'a.devries@student.inholland.nl',
+  rolePreference: 'student',
+  notifyQuestions: true,
+  notifyMilestones: true,
+  notifyExpectations: false,
+  language: 'en',
+}
+
+export function loadProfile(): UserProfile {
+  if (typeof window === 'undefined') return defaultProfile
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY)
+    if (!raw) return defaultProfile
+    return { ...defaultProfile, ...JSON.parse(raw) } as UserProfile
+  } catch {
+    return defaultProfile
+  }
+}
+
+export function saveProfile(profile: UserProfile): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
+  } catch {
+    // storage quota exceeded — silently ignore
+  }
+}
 
 const defaultData: DashboardData = {
   questions: seedQuestions,

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { BookOpen, Wrench, MessageCircle, SmilePlus, Smile, Meh, Frown, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -85,6 +86,7 @@ export function AppliedLearningCycle({ data, role, onUpdate }: Props) {
     setReflectionText('')
     setAuthorName('')
     setMood('good')
+    toast.success('Reflection submitted!', { description: `Session ${selectedSession}: ${activeSession?.title}` })
   }
 
   return (
@@ -281,15 +283,20 @@ export function AppliedLearningCycle({ data, role, onUpdate }: Props) {
             <CardContent>
               <div className="space-y-2">
                 {sessions.filter(s => s.number > 3).map(s => (
-                  <div key={s.number} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: '#E6007E' }}>
+                  <button
+                    key={s.number}
+                    onClick={() => setSelectedSession(s.number)}
+                    className="w-full flex items-center gap-3 py-2 border-b border-border last:border-0 hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors text-left"
+                    title={`View reflections for Session ${s.number}`}
+                  >
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: selectedSession === s.number ? '#a8005c' : '#E6007E' }}>
                       {s.number}
                     </div>
                     <div>
                       <p className="text-xs font-medium leading-tight">{s.title}</p>
                       <p className="text-xs text-muted-foreground">{new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </CardContent>

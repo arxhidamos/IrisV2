@@ -1,4 +1,4 @@
-import type { Question, Expectation, SessionReflection, Deliverable, Milestone } from './types'
+import type { Question, Expectation, SessionReflection, Deliverable, Milestone, Grade } from './types'
 
 export const seedQuestions: Question[] = [
   {
@@ -297,5 +297,73 @@ export const seedMilestones: Milestone[] = [
     dueDate: '2025-06-20',
     completed: false,
     description: '10-minute pitch to the panel. See Criteria Transparency board for assessment criteria.',
+  },
+]
+
+export const seedGrades: Grade[] = [
+  {
+    id: 'g1',
+    course: 'Business Research Methods',
+    ects: 5,
+    grade: 7.8,
+    period: '2024–25 P1',
+    passed: true,
+  },
+  {
+    id: 'g2',
+    course: 'Innovation Management',
+    ects: 5,
+    grade: 8.2,
+    period: '2024–25 P1',
+    passed: true,
+  },
+  {
+    id: 'g3',
+    course: 'Financial Accounting',
+    ects: 5,
+    grade: 6.5,
+    period: '2024–25 P2',
+    passed: true,
+  },
+  {
+    id: 'g4',
+    course: 'Marketing Strategy',
+    ects: 5,
+    grade: 7.1,
+    period: '2024–25 P2',
+    passed: true,
+  },
+  {
+    id: 'g5',
+    course: 'Organisational Behaviour',
+    ects: 5,
+    grade: 8.5,
+    period: '2024–25 P3',
+    passed: true,
+  },
+  {
+    id: 'g6',
+    course: 'Business Law & Ethics',
+    ects: 5,
+    grade: 6.0,
+    period: '2024–25 P3',
+    passed: true,
+  },
+  {
+    id: 'g7',
+    course: 'Digital Transformation',
+    ects: 5,
+    grade: 7.4,
+    period: '2024–25 P3',
+    passed: true,
+  },
+  {
+    id: 'g8',
+    course: 'Business Innovation Project',
+    ects: 10,
+    grade: null,
+    period: '2024–25 P4',
+    passed: false,
+    inProgress: true,
   },
 ]

@@ -92,14 +92,14 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
       <div className="lg:col-span-2 space-y-4">
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
                 <CardTitle>Student Expectations</CardTitle>
                 <CardDescription className="mt-1">
                   What students need to succeed — lecturer responses shown below each item.
                 </CardDescription>
               </div>
-              <Badge variant="muted">{confirmedCount}/{total} confirmed</Badge>
+              <Badge variant="muted" className="flex-shrink-0 whitespace-nowrap">{confirmedCount}/{total} confirmed</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -126,7 +126,7 @@ export function ExpectationClarity({ data, role, onUpdate }: Props) {
                 {role === 'lecturer' && editingId === exp.id && (
                   <div className="mt-3 space-y-2 bg-white rounded-md p-3 border border-border">
                     <Label className="text-xs">Status</Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {(['confirmed', 'revised', 'pending'] as const).map(s => (
                         <button
                           key={s}

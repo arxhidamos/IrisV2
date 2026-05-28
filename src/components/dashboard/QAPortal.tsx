@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, CheckCircle2, Clock, Send, ChevronDown, ChevronUp, Tag, Share2, ThumbsUp } from 'lucide-react'
+import { MessageCircle, CheckCircle2, Clock, Send, ChevronDown, ChevronUp, Tag, Share2, ThumbsUp, Search, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -53,10 +53,10 @@ interface Props {
 
 export function QAPortal({ data, role, onUpdate }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [replyText, setReplyText] = useState<Record<string, string>>({})
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  // Helpful votes (local state only — no backend)
   const [helpfulVotes, setHelpfulVotes] = useState<Set<string>>(new Set())
 
   // New question form state
@@ -66,10 +66,16 @@ export function QAPortal({ data, role, onUpdate }: Props) {
   const [qAuthor, setQAuthor] = useState('')
   const [showForm, setShowForm] = useState(false)
 
+  const query = searchQuery.trim().toLowerCase()
+
   const filtered = data.questions.filter(q => {
-    if (filter === 'all') return true
-    if (filter === 'unanswered') return !q.answered
-    return q.tag === filter
+    const matchesFilter = filter === 'all' ? true : filter === 'unanswered' ? !q.answered : q.tag === filter
+    const matchesSearch = query === '' ? true :
+      q.text.toLowerCase().includes(query) ||
+      q.tag.toLowerCase().includes(query) ||
+      q.authorName.toLowerCase().includes(query) ||
+      q.answers.some(a => a.text.toLowerCase().includes(query))
+    return matchesFilter && matchesSearch
   })
 
   function toggleExpand(id: string) {
@@ -140,26 +146,56 @@ export function QAPortal({ data, role, onUpdate }: Props) {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Questions list */}
       <div className="lg:col-span-2 space-y-4">
-        {/* Filters + ask button */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
+        {/* Search bar */}
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search questions, tags, answers…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full rounded-lg border border-border bg-white pl-9 pr-8 py-2 text-sm outline-none transition"
+            onFocus={e => { e.currentTarget.style.borderColor = '#E6007E'; e.currentTarget.style.boxShadow = '0 0 0 2px #E6007E20' }}
+            onBlur={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.boxShadow = '' }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Tag filters + ask button */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {(['all', 'unanswered', 'criteria', 'logistics', 'content'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${filter === f ? 'text-white border-transparent' : 'border-border bg-white text-muted-foreground hover:border-primary/40'}`}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${filter === f ? 'text-white border-transparent' : 'border-border bg-white text-muted-foreground hover:border-primary/40'}`}
                 style={filter === f ? { backgroundColor: '#E6007E', borderColor: '#E6007E' } : {}}
               >
-                {f === 'all' ? 'All questions' : f === 'unanswered' ? `Unanswered (${unansweredCount})` : tagConfig[f as QuestionTag]?.label}
+                {f === 'all' ? 'All' : f === 'unanswered' ? `Unanswered (${unansweredCount})` : tagConfig[f as QuestionTag]?.label}
               </button>
             ))}
           </div>
           {role === 'student' && (
             <Button size="sm" onClick={() => setShowForm(v => !v)} style={{ backgroundColor: '#E6007E', color: 'white' }}>
-              {showForm ? 'Cancel' : '+ Ask a question'}
+              {showForm ? 'Cancel' : '+ Ask'}
             </Button>
           )}
         </div>
+
+        {/* Search result count */}
+        {query && (
+          <p className="text-xs text-muted-foreground">
+            {filtered.length === 0 ? 'No questions match your search.' : `${filtered.length} question${filtered.length !== 1 ? 's' : ''} found`}
+          </p>
+        )}
 
         {/* Ask form */}
         {showForm && role === 'student' && (
@@ -178,7 +214,7 @@ export function QAPortal({ data, role, onUpdate }: Props) {
                   className="min-h-[90px]"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Topic</Label>
                   <Select value={qTag} onValueChange={v => setQTag(v as QuestionTag)}>
@@ -224,7 +260,14 @@ export function QAPortal({ data, role, onUpdate }: Props) {
           <Card>
             <CardContent className="py-12 text-center">
               <MessageCircle size={36} className="mx-auto mb-3 text-muted-foreground opacity-30" />
-              <p className="text-sm text-muted-foreground">No questions found for this filter.</p>
+              <p className="text-sm text-muted-foreground">
+                {query ? `No questions match "${searchQuery}".` : 'No questions found for this filter.'}
+              </p>
+              {query && (
+                <button onClick={() => setSearchQuery('')} className="mt-2 text-xs underline" style={{ color: '#E6007E' }}>
+                  Clear search
+                </button>
+              )}
             </CardContent>
           </Card>
         )}

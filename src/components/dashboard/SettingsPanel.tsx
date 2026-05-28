@@ -45,7 +45,7 @@ export function SettingsPanel({ profile, onClose, onSave, onLogout }: Props) {
 
       {/* Panel */}
       <aside
-        className="fixed right-0 top-0 h-full z-50 w-full max-w-md bg-white shadow-2xl flex flex-col overflow-hidden"
+        className="fixed right-0 top-0 h-full z-50 w-full sm:max-w-md bg-white shadow-2xl flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Panel header */}

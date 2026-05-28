@@ -134,18 +134,18 @@ export function CriteriaTransparency({ data, role }: Props) {
           return (
             <Card key={deliverable.id} className="overflow-hidden">
               <AccordionItem value={deliverable.id} className="border-0">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline [&>svg]:text-muted-foreground">
-                  <div className="flex flex-1 items-center gap-4 text-left">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0" style={{ backgroundColor: '#E6007E15' }}>
+                <AccordionTrigger className="px-3 sm:px-6 py-3 sm:py-4 hover:no-underline [&>svg]:text-muted-foreground">
+                  <div className="flex flex-1 items-center gap-2 sm:gap-4 text-left">
+                    <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0" style={{ backgroundColor: '#E6007E15' }}>
                       <FileText size={18} style={{ color: '#E6007E' }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{deliverable.title}</p>
+                      <p className="font-semibold text-sm truncate">{deliverable.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{deliverable.description}</p>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                       {role === 'student' && selfAssessedForThis > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">
+                        <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">
                           <CheckSquare size={10} />
                           {selfAssessedForThis}/{deliverable.criteria.length}
                         </span>
@@ -164,7 +164,7 @@ export function CriteriaTransparency({ data, role }: Props) {
                 </AccordionTrigger>
 
                 <AccordionContent className="px-0 pb-0">
-                  <div className="px-6 pb-6 space-y-4">
+                  <div className="px-3 sm:px-6 pb-4 sm:pb-6 space-y-4">
                     <p className="text-sm text-muted-foreground">{deliverable.description}</p>
 
                     {/* Actions row */}

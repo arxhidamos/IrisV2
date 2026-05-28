@@ -68,6 +68,66 @@ export function saveProfile(profile: UserProfile): void {
   }
 }
 
+// ─── Notifications (read state) ──────────────────────────────────────────────
+
+const NOTIF_KEY = 'inholland_iris_notif_read'
+
+export function getReadNotifications(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = localStorage.getItem(NOTIF_KEY)
+    return new Set(raw ? JSON.parse(raw) : [])
+  } catch {
+    return new Set()
+  }
+}
+
+export function markNotificationsRead(ids: string[]): void {
+  if (typeof window === 'undefined') return
+  try {
+    const existing = getReadNotifications()
+    ids.forEach(id => existing.add(id))
+    localStorage.setItem(NOTIF_KEY, JSON.stringify([...existing]))
+  } catch { /* ignore */ }
+}
+
+export function dismissNotification(id: string): void {
+  markNotificationsRead([id])
+}
+
+// ─── ECTS / Grades ───────────────────────────────────────────────────────────
+
+import type { ECTSData } from './types'
+import { seedGrades } from './seed-data'
+
+const ECTS_KEY = 'inholland_iris_ects'
+
+const defaultECTS: ECTSData = {
+  grades: seedGrades,
+  totalProgramECTS: 240,
+  initialized: true,
+}
+
+export function loadECTS(): ECTSData {
+  if (typeof window === 'undefined') return defaultECTS
+  try {
+    const raw = localStorage.getItem(ECTS_KEY)
+    if (!raw) return defaultECTS
+    const parsed = JSON.parse(raw) as ECTSData
+    if (!parsed.initialized) return defaultECTS
+    return parsed
+  } catch {
+    return defaultECTS
+  }
+}
+
+export function saveECTS(data: ECTSData): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(ECTS_KEY, JSON.stringify(data))
+  } catch { /* ignore */ }
+}
+
 const defaultData: DashboardData = {
   questions: seedQuestions,
   expectations: seedExpectations,

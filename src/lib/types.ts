@@ -89,3 +89,19 @@ export interface AuthSession {
   loggedIn: boolean
   loginTime: string
 }
+
+export interface Grade {
+  id: string
+  course: string
+  ects: number
+  grade: number | null
+  period: string
+  passed: boolean
+  inProgress?: boolean
+}
+
+export interface ECTSData {
+  grades: Grade[]
+  totalProgramECTS: number
+  initialized: boolean
+}

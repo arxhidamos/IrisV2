@@ -53,7 +53,7 @@ export function LoginForm() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F4F5F7' }}>
       {/* Magenta header */}
-      <header className="h-14 flex items-center px-6" style={{ backgroundColor: '#E6007E' }}>
+      <header className="h-14 flex items-center px-3 sm:px-6" style={{ backgroundColor: '#E6007E' }}>
         <div className="flex items-center gap-3">
           <Image
             src="/inholland-logo.svg"
@@ -64,8 +64,8 @@ export function LoginForm() {
             priority
           />
           <div className="flex flex-col leading-tight">
-            <span className="text-white font-semibold text-sm">Business Innovation</span>
-            <span className="text-white/70 text-xs">Inholland · 2024–2025</span>
+            <span className="text-white font-semibold text-xs sm:text-sm">Business Innovation</span>
+            <span className="hidden sm:block text-white/70 text-xs">Inholland · 2024–2025</span>
           </div>
         </div>
       </header>
@@ -76,7 +76,7 @@ export function LoginForm() {
           {/* Card */}
           <div className="bg-white rounded-2xl shadow-lg border border-border overflow-hidden">
             {/* Card header strip */}
-            <div className="px-8 pt-8 pb-6 border-b border-border">
+            <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 border-b border-border">
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/inholland-logo.svg"
@@ -97,7 +97,7 @@ export function LoginForm() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
+            <form onSubmit={handleSubmit} className="px-5 sm:px-8 py-5 sm:py-6 space-y-4">
               {/* Error message */}
               {error && (
                 <div className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm bg-red-50 text-red-700 border border-red-200">
